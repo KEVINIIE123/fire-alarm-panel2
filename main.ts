@@ -3,6 +3,7 @@ radio.onReceivedNumber(function (receivedNumber) {
         test = 1
     }
 })
+// Button A
 input.onButtonPressed(Button.A, function () {
     if (alarm == 1 && (silence == 0 && ack == 0)) {
         ack = 1
@@ -10,9 +11,29 @@ input.onButtonPressed(Button.A, function () {
         troublesilence = 1
     }
 })
+function Display (_1: string, _2: string) {
+    if (_1 != display1 || _2 != display2) {
+        I2C_LCD1602.ShowString(_1, 0, 0)
+        I2C_LCD1602.ShowString(_2, 0, 1)
+        display1 = _1
+        display2 = _2
+    } else {
+    	
+    }
+}
+// Button AB reset
 input.onButtonPressed(Button.AB, function () {
-    control.reset()
+    if (input.pinIsPressed(TouchPin.P0) || (input.pinIsPressed(TouchPin.P1) || input.pinIsPressed(TouchPin.P2))) {
+        resetmessage = 1
+        Display("Can't reset     ", "Zone(s) in alarm")
+        basic.pause(2000)
+        resetmessage = 0
+    } else {
+        I2C_LCD1602.clear()
+        control.reset()
+    }
 })
+// Button B
 input.onButtonPressed(Button.B, function () {
     if (alarm == 1 && (silence == 0 && ack == 1)) {
         silence = 1
@@ -30,11 +51,15 @@ let alarm = 0
 let noac = 0
 let trouble = 0
 let test = 0
+let display2 = ""
+let display1 = ""
 led.enable(false)
 let boot = 1
 I2C_LCD1602.LcdInit(0)
 I2C_LCD1602.ShowString("Booting...", 0, 0)
 I2C_LCD1602.ShowString("Setting variable", 0, 1)
+display1 = ""
+display2 = ""
 pins.setAudioPin(AnalogPin.P16)
 I2C_LCD1602.ShowString("Setting radio...", 0, 1)
 radio.setGroup(1)
@@ -77,8 +102,7 @@ basic.forever(function () {
         if (pins.digitalReadPin(DigitalPin.P7) == 1) {
             if (input.pinIsPressed(TouchPin.P0) || (input.pinIsPressed(TouchPin.P1) || input.pinIsPressed(TouchPin.P2))) {
                 resetmessage = 1
-                I2C_LCD1602.ShowString("Can't reset     ", 0, 0)
-                I2C_LCD1602.ShowString("Zone(s) in alarm", 0, 1)
+                Display("Can't reset     ", "Zone(s) in alarm")
                 basic.pause(2000)
                 resetmessage = 0
             } else {
@@ -99,79 +123,124 @@ basic.forever(function () {
 basic.forever(function () {
     if (alarm == 0 && (silence == 0 && (ack == 0 && trouble == 0))) {
         if (resetmessage == 0) {
-            I2C_LCD1602.ShowString("System normal   ", 0, 0)
+            Display("System normal   ", "                ")
         }
     } else if (alarm == 1 && (silence == 0 && ack == 0)) {
-        pins.digitalWritePin(DigitalPin.P3, 1)
-        pins.digitalWritePin(DigitalPin.P16, 1)
-        basic.pause(100)
-        pins.digitalWritePin(DigitalPin.P3, 0)
-        pins.digitalWritePin(DigitalPin.P16, 0)
-        basic.pause(100)
         if (resetmessage == 0) {
-            I2C_LCD1602.ShowString("FIRE ALARM      ", 0, 0)
-            I2C_LCD1602.ShowString("Click to ack    ", 0, 1)
-        }
-    } else if (alarm == 1 && (silence == 0 && ack == 1)) {
-        if (resetmessage == 0) {
-            I2C_LCD1602.ShowString("FIRE ALARM zones", 0, 0)
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
+                Display("FIRE ALARM      ", "1               ")
                 pins.digitalWritePin(DigitalPin.P13, 1)
-                I2C_LCD1602.ShowString("1               ", 0, 1)
             } else if (zone1 == 0 && (zone2 == 1 && zone3 == 0)) {
                 pins.digitalWritePin(DigitalPin.P14, 1)
-                I2C_LCD1602.ShowString("2               ", 0, 1)
+                Display("FIRE ALARM      ", "2               ")
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                I2C_LCD1602.ShowString("3               ", 0, 1)
+                Display("FIRE ALARM      ", "3               ")
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 0)) {
                 pins.digitalWritePin(DigitalPin.P13, 1)
                 pins.digitalWritePin(DigitalPin.P14, 1)
-                I2C_LCD1602.ShowString("1,2             ", 0, 1)
+                Display("FIRE ALARM      ", "1,2             ")
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 1)) {
-                I2C_LCD1602.ShowString("1,2,3           ", 0, 1)
+                Display("FIRE ALARM      ", "1,2,3           ")
                 pins.digitalWritePin(DigitalPin.P13, 1)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             } else if (zone1 == 1 && (zone2 == 0 && zone3 == 1)) {
-                I2C_LCD1602.ShowString("1,3             ", 0, 1)
+                Display("FIRE ALARM      ", "1,3             ")
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                I2C_LCD1602.ShowString("2,3             ", 0, 1)
+                Display("FIRE ALARM      ", "2,3             ")
+                pins.digitalWritePin(DigitalPin.P14, 1)
+            }
+        }
+        pins.digitalWritePin(DigitalPin.P3, 1)
+        pins.digitalWritePin(DigitalPin.P16, 1)
+        basic.pause(100)
+        if (resetmessage == 0) {
+            if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
+                Display("FIRE ALARM      ", "1               ")
+                pins.digitalWritePin(DigitalPin.P13, 0)
+            } else if (zone1 == 0 && (zone2 == 1 && zone3 == 0)) {
+                pins.digitalWritePin(DigitalPin.P14, 0)
+                Display("FIRE ALARM      ", "2               ")
+            } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
+                Display("FIRE ALARM      ", "3               ")
+            } else if (zone1 == 1 && (zone2 == 1 && zone3 == 0)) {
+                pins.digitalWritePin(DigitalPin.P13, 0)
+                pins.digitalWritePin(DigitalPin.P14, 0)
+                Display("FIRE ALARM      ", "1,2             ")
+            } else if (zone1 == 1 && (zone2 == 1 && zone3 == 1)) {
+                Display("FIRE ALARM      ", "1,2,3           ")
+                pins.digitalWritePin(DigitalPin.P13, 0)
+                pins.digitalWritePin(DigitalPin.P14, 0)
+            } else if (zone1 == 1 && (zone2 == 0 && zone3 == 1)) {
+                Display("FIRE ALARM      ", "1,3             ")
+                pins.digitalWritePin(DigitalPin.P13, 0)
+            } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
+                Display("FIRE ALARM      ", "2,3             ")
+                pins.digitalWritePin(DigitalPin.P14, 0)
+            }
+        }
+        pins.digitalWritePin(DigitalPin.P3, 0)
+        pins.digitalWritePin(DigitalPin.P16, 0)
+        basic.pause(100)
+    } else if (alarm == 1 && (silence == 0 && ack == 1)) {
+        if (resetmessage == 0) {
+            if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
+                Display("ALARM ACK       ", "1               ")
+                pins.digitalWritePin(DigitalPin.P13, 1)
+            } else if (zone1 == 0 && (zone2 == 1 && zone3 == 0)) {
+                pins.digitalWritePin(DigitalPin.P14, 1)
+                Display("ALARM ACK       ", "2               ")
+            } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
+                Display("ALARM ACK       ", "3               ")
+            } else if (zone1 == 1 && (zone2 == 1 && zone3 == 0)) {
+                pins.digitalWritePin(DigitalPin.P13, 1)
+                pins.digitalWritePin(DigitalPin.P14, 1)
+                Display("ALARM ACK       ", "1,2             ")
+            } else if (zone1 == 1 && (zone2 == 1 && zone3 == 1)) {
+                Display("ALARM ACK       ", "1,2,3           ")
+                pins.digitalWritePin(DigitalPin.P13, 1)
+                pins.digitalWritePin(DigitalPin.P14, 1)
+            } else if (zone1 == 1 && (zone2 == 0 && zone3 == 1)) {
+                Display("ALARM ACK       ", "1,3             ")
+                pins.digitalWritePin(DigitalPin.P13, 1)
+            } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
+                Display("ALARM ACK       ", "2,3             ")
                 pins.digitalWritePin(DigitalPin.P14, 1)
             }
         }
     } else if (alarm == 1 && (silence == 1 && ack == 1)) {
         pins.digitalWritePin(DigitalPin.P8, 1)
         if (resetmessage == 0) {
-            I2C_LCD1602.ShowString("ALARM SILENCED  ", 0, 0)
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
-                I2C_LCD1602.ShowString("1               ", 0, 1)
+                Display("ALARM SILENCED  ", "1               ")
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 1 && zone3 == 0)) {
-                I2C_LCD1602.ShowString("2               ", 0, 1)
+                Display("ALARM SILENCED  ", "2               ")
                 pins.digitalWritePin(DigitalPin.P14, 1)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                I2C_LCD1602.ShowString("3               ", 0, 1)
+                Display("ALARM SILENCED  ", "3               ")
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 0)) {
-                I2C_LCD1602.ShowString("1,2             ", 0, 1)
+                Display("ALARM SILENCED  ", "1,2             ")
                 pins.digitalWritePin(DigitalPin.P13, 1)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 1)) {
-                I2C_LCD1602.ShowString("1,2,3           ", 0, 1)
+                Display("ALARM SILENCED  ", "1,2,3           ")
                 pins.digitalWritePin(DigitalPin.P14, 1)
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 1 && (zone2 == 0 && zone3 == 1)) {
-                I2C_LCD1602.ShowString("1,3             ", 0, 1)
+                Display("ALARM SILENCED  ", "1,3             ")
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                I2C_LCD1602.ShowString("2,3             ", 0, 1)
+                Display("ALARM SILENCED  ", "2,3             ")
                 pins.digitalWritePin(DigitalPin.P14, 1)
             }
         }
     }
     if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 0)))) {
-        I2C_LCD1602.ShowString("System in fault ", 0, 0)
         if (noac == 1) {
-            I2C_LCD1602.ShowString("NO AC POWER     ", 0, 1)
+            Display("System in fault ", "NO AC POWER     ")
+        } else {
+            Display("System in fault ", "")
         }
         pins.digitalWritePin(DigitalPin.P10, 1)
         pins.digitalWritePin(DigitalPin.P16, 1)
@@ -182,10 +251,13 @@ basic.forever(function () {
     } else if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 1)))) {
         pins.digitalWritePin(DigitalPin.P16, 0)
         pins.digitalWritePin(DigitalPin.P10, 1)
-        I2C_LCD1602.ShowString("Fault silenced  ", 0, 0)
         if (noac == 1) {
-            I2C_LCD1602.ShowString("NO AC POWER     ", 0, 1)
+            Display("Fault silenced  ", "NO AC POWER     ")
+        } else {
+            Display("Fault silenced  ", "")
         }
+    } else if (trouble == 1 && alarm == 1) {
+        pins.digitalWritePin(DigitalPin.P10, 1)
     }
 })
 basic.forever(function () {

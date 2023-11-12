@@ -4,6 +4,8 @@ def on_received_number(receivedNumber):
         test = 1
 radio.on_received_number(on_received_number)
 
+# Button A
+
 def on_button_pressed_a():
     global ack, troublesilence
     if alarm == 1 and (silence == 0 and ack == 0):
@@ -12,9 +14,16 @@ def on_button_pressed_a():
         troublesilence = 1
 input.on_button_pressed(Button.A, on_button_pressed_a)
 
+def Display(_1: number, _2: number):
+    if True:
+        pass
+# Button AB reset
+
 def on_button_pressed_ab():
     control.reset()
 input.on_button_pressed(Button.AB, on_button_pressed_ab)
+
+# Button B
 
 def on_button_pressed_b():
     global silence
@@ -100,6 +109,7 @@ def on_forever2():
     if alarm == 0 and (silence == 0 and (ack == 0 and trouble == 0)):
         if resetmessage == 0:
             I2C_LCD1602.show_string("System normal   ", 0, 0)
+            I2C_LCD1602.show_string("                ", 0, 1)
     elif alarm == 1 and (silence == 0 and ack == 0):
         pins.digital_write_pin(DigitalPin.P3, 1)
         pins.digital_write_pin(DigitalPin.P16, 1)
