@@ -269,7 +269,7 @@ basic.forever(function () {
         pins.digitalWritePin(DigitalPin.P16, 0)
         basic.pause(1000)
     } else if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 1)))) {
-        LCDbacklight(1)
+        LCDbacklight(0)
         pins.digitalWritePin(DigitalPin.P16, 0)
         pins.digitalWritePin(DigitalPin.P10, 1)
         if (noac == 1) {
