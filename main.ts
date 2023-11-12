@@ -25,6 +25,7 @@ function Display (_1: string, _2: string) {
 input.onButtonPressed(Button.AB, function () {
     if (input.pinIsPressed(TouchPin.P0) || (input.pinIsPressed(TouchPin.P1) || input.pinIsPressed(TouchPin.P2))) {
         resetmessage = 1
+        LCDbacklight(1)
         Display("Can't reset     ", "Zone(s) in alarm")
         basic.pause(2000)
         resetmessage = 0
@@ -40,6 +41,17 @@ input.onButtonPressed(Button.B, function () {
         pins.digitalWritePin(DigitalPin.P15, 0)
     }
 })
+function LCDbacklight (disableenable: number) {
+    if (disableenable == 0 && backlight != 0) {
+        backlight = 0
+        I2C_LCD1602.BacklightOff()
+    } else if (disableenable == 1 && backlight != 1) {
+        backlight = 1
+        I2C_LCD1602.BacklightOn()
+    } else {
+    	
+    }
+}
 let zone3 = 0
 let zone2 = 0
 let zone1 = 0
@@ -53,11 +65,13 @@ let trouble = 0
 let test = 0
 let display2 = ""
 let display1 = ""
+let backlight = 0
 led.enable(false)
 let boot = 1
 I2C_LCD1602.LcdInit(0)
 I2C_LCD1602.ShowString("Booting...", 0, 0)
 I2C_LCD1602.ShowString("Setting variable", 0, 1)
+backlight = 1
 display1 = ""
 display2 = ""
 pins.setAudioPin(AnalogPin.P16)
@@ -122,10 +136,12 @@ basic.forever(function () {
 })
 basic.forever(function () {
     if (alarm == 0 && (silence == 0 && (ack == 0 && trouble == 0))) {
+        LCDbacklight(0)
         if (resetmessage == 0) {
             Display("System normal   ", "                ")
         }
     } else if (alarm == 1 && (silence == 0 && ack == 0)) {
+        LCDbacklight(1)
         if (resetmessage == 0) {
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
                 Display("FIRE ALARM      ", "1               ")
@@ -154,6 +170,7 @@ basic.forever(function () {
         pins.digitalWritePin(DigitalPin.P3, 1)
         pins.digitalWritePin(DigitalPin.P16, 1)
         basic.pause(100)
+        LCDbacklight(1)
         if (resetmessage == 0) {
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
                 Display("FIRE ALARM      ", "1               ")
@@ -183,6 +200,7 @@ basic.forever(function () {
         pins.digitalWritePin(DigitalPin.P16, 0)
         basic.pause(100)
     } else if (alarm == 1 && (silence == 0 && ack == 1)) {
+        LCDbacklight(1)
         if (resetmessage == 0) {
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
                 Display("ALARM ACK       ", "1               ")
@@ -210,6 +228,7 @@ basic.forever(function () {
         }
     } else if (alarm == 1 && (silence == 1 && ack == 1)) {
         pins.digitalWritePin(DigitalPin.P8, 1)
+        LCDbacklight(1)
         if (resetmessage == 0) {
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
                 Display("ALARM SILENCED  ", "1               ")
@@ -237,6 +256,7 @@ basic.forever(function () {
         }
     }
     if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 0)))) {
+        LCDbacklight(1)
         if (noac == 1) {
             Display("System in fault ", "NO AC POWER     ")
         } else {
@@ -249,6 +269,7 @@ basic.forever(function () {
         pins.digitalWritePin(DigitalPin.P16, 0)
         basic.pause(1000)
     } else if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 1)))) {
+        LCDbacklight(1)
         pins.digitalWritePin(DigitalPin.P16, 0)
         pins.digitalWritePin(DigitalPin.P10, 1)
         if (noac == 1) {
