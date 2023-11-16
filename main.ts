@@ -1,6 +1,6 @@
 radio.onReceivedNumber(function (receivedNumber) {
     if (receivedNumber == 1) {
-        test = 1
+        ACtimer = 10
     }
 })
 // Button A
@@ -48,21 +48,19 @@ function LCDbacklight (disableenable: number) {
     } else if (disableenable == 1 && backlight != 1) {
         backlight = 1
         I2C_LCD1602.BacklightOn()
-    } else {
-    	
     }
 }
+let noac = 0
 let zone3 = 0
 let zone2 = 0
 let zone1 = 0
 let resetmessage = 0
 let troublesilence = 0
+let trouble = 0
 let ack = 0
 let silence = 0
 let alarm = 0
-let noac = 0
-let trouble = 0
-let test = 0
+let ACtimer = 0
 let display2 = ""
 let display1 = ""
 let backlight = 0
@@ -76,21 +74,7 @@ display1 = ""
 display2 = ""
 pins.setAudioPin(AnalogPin.P16)
 I2C_LCD1602.ShowString("Setting radio...", 0, 1)
-radio.setGroup(1)
-I2C_LCD1602.ShowString("AC test...      ", 0, 1)
-for (let index = 0; index < 10; index++) {
-    if (test == 1) {
-        break;
-    } else {
-        basic.pause(500)
-    }
-}
-if (test == 0) {
-    trouble = 1
-    noac = 1
-    I2C_LCD1602.ShowString("AC test fail    ", 0, 1)
-    basic.pause(1000)
-}
+radio.setGroup(86)
 I2C_LCD1602.ShowString("################", 0, 1)
 I2C_LCD1602.ShowString("################", 0, 0)
 pins.digitalWritePin(DigitalPin.P3, 1)
@@ -269,7 +253,7 @@ basic.forever(function () {
         pins.digitalWritePin(DigitalPin.P16, 0)
         basic.pause(1000)
     } else if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 1)))) {
-        LCDbacklight(0)
+        LCDbacklight(1)
         pins.digitalWritePin(DigitalPin.P16, 0)
         pins.digitalWritePin(DigitalPin.P10, 1)
         if (noac == 1) {
@@ -279,6 +263,17 @@ basic.forever(function () {
         }
     } else if (trouble == 1 && alarm == 1) {
         pins.digitalWritePin(DigitalPin.P10, 1)
+    }
+})
+basic.forever(function () {
+    if (ACtimer != 0) {
+        ACtimer += -1
+        basic.pause(1000)
+        noac = 0
+        trouble = 0
+    } else {
+        noac = 1
+        trouble = 1
     }
 })
 basic.forever(function () {
