@@ -13,8 +13,8 @@ input.onButtonPressed(Button.A, function () {
 })
 function Display (_1: string, _2: string) {
     if (_1 != display1 || _2 != display2) {
-        I2C_LCD1602.ShowString(_1, 0, 0)
-        I2C_LCD1602.ShowString(_2, 0, 1)
+        makerbit.showStringOnLcd1602(_1, makerbit.position1602(LcdPosition1602.Pos1), 16)
+        makerbit.showStringOnLcd1602(_2, makerbit.position1602(LcdPosition1602.Pos17), 16)
         display1 = _1
         display2 = _2
     } else {
@@ -30,7 +30,7 @@ input.onButtonPressed(Button.AB, function () {
         basic.pause(2000)
         resetmessage = 0
     } else {
-        I2C_LCD1602.clear()
+        makerbit.clearLcd1602()
         control.reset()
     }
 })
@@ -44,10 +44,10 @@ input.onButtonPressed(Button.B, function () {
 function LCDbacklight (disableenable: number) {
     if (disableenable == 0 && backlight != 0) {
         backlight = 0
-        I2C_LCD1602.BacklightOff()
+        makerbit.setLcdBacklight(LcdBacklight.Off)
     } else if (disableenable == 1 && backlight != 1) {
         backlight = 1
-        I2C_LCD1602.BacklightOn()
+        makerbit.setLcdBacklight(LcdBacklight.On)
     }
 }
 let noac = 0
@@ -66,17 +66,17 @@ let display1 = ""
 let backlight = 0
 led.enable(false)
 let boot = 1
-I2C_LCD1602.LcdInit(0)
-I2C_LCD1602.ShowString("Booting...", 0, 0)
-I2C_LCD1602.ShowString("Setting variable", 0, 1)
+makerbit.connectLcd(39)
+makerbit.showStringOnLcd1602("Booting...", makerbit.position1602(LcdPosition1602.Pos1), 16)
+makerbit.showStringOnLcd1602("Setting variable", makerbit.position1602(LcdPosition1602.Pos17), 16)
 backlight = 1
 display1 = ""
 display2 = ""
 pins.setAudioPin(AnalogPin.P16)
-I2C_LCD1602.ShowString("Setting radio...", 0, 1)
+makerbit.showStringOnLcd1602("Setting radio...", makerbit.position1602(LcdPosition1602.Pos1), 16)
 radio.setGroup(86)
-I2C_LCD1602.ShowString("################", 0, 1)
-I2C_LCD1602.ShowString("################", 0, 0)
+makerbit.showStringOnLcd1602("################", makerbit.position1602(LcdPosition1602.Pos1), 16)
+makerbit.showStringOnLcd1602("################", makerbit.position1602(LcdPosition1602.Pos17), 16)
 pins.digitalWritePin(DigitalPin.P3, 1)
 pins.digitalWritePin(DigitalPin.P6, 1)
 pins.digitalWritePin(DigitalPin.P8, 1)
@@ -92,7 +92,7 @@ pins.digitalWritePin(DigitalPin.P10, 0)
 pins.digitalWritePin(DigitalPin.P13, 0)
 pins.digitalWritePin(DigitalPin.P14, 0)
 pins.digitalWritePin(DigitalPin.P16, 0)
-I2C_LCD1602.clear()
+makerbit.clearLcd1602()
 boot = 0
 basic.forever(function () {
     if (pins.digitalReadPin(DigitalPin.P7) == 1) {
@@ -104,7 +104,7 @@ basic.forever(function () {
                 basic.pause(2000)
                 resetmessage = 0
             } else {
-                I2C_LCD1602.clear()
+                makerbit.clearLcd1602()
                 control.reset()
             }
         }
@@ -280,7 +280,7 @@ basic.forever(function () {
     if (boot == 0) {
         if (input.pinIsPressed(TouchPin.P0)) {
             if (zone1 == 0) {
-                I2C_LCD1602.clear()
+                makerbit.clearLcd1602()
                 basic.pause(250)
                 alarm = 1
                 zone1 = 1
@@ -289,7 +289,7 @@ basic.forever(function () {
             }
         } else if (input.pinIsPressed(TouchPin.P1)) {
             if (zone2 == 0) {
-                I2C_LCD1602.clear()
+                makerbit.clearLcd1602()
                 basic.pause(250)
                 alarm = 1
                 zone2 = 1
@@ -298,7 +298,7 @@ basic.forever(function () {
             }
         } else if (input.pinIsPressed(TouchPin.P2)) {
             if (zone3 == 0) {
-                I2C_LCD1602.clear()
+                makerbit.clearLcd1602()
                 basic.pause(250)
                 alarm = 1
                 zone3 = 1
