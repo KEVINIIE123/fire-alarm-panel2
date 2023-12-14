@@ -280,8 +280,6 @@ basic.forever(function () {
     if (boot == 0) {
         if (input.pinIsPressed(TouchPin.P0)) {
             if (zone1 == 0) {
-                makerbit.clearLcd1602()
-                basic.pause(250)
                 alarm = 1
                 zone1 = 1
                 ack = 0
@@ -289,8 +287,6 @@ basic.forever(function () {
             }
         } else if (input.pinIsPressed(TouchPin.P1)) {
             if (zone2 == 0) {
-                makerbit.clearLcd1602()
-                basic.pause(250)
                 alarm = 1
                 zone2 = 1
                 ack = 0
@@ -298,8 +294,6 @@ basic.forever(function () {
             }
         } else if (input.pinIsPressed(TouchPin.P2)) {
             if (zone3 == 0) {
-                makerbit.clearLcd1602()
-                basic.pause(250)
                 alarm = 1
                 zone3 = 1
                 ack = 0
