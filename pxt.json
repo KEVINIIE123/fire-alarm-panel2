@@ -6,8 +6,6 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "i2cLCD1602": "github:makecode-extensions/i2clcd1602#v1.5.0",
-        "microbit-pxt-clicks": "github:bsiever/microbit-pxt-clicks#v0.2.2",
         "MakerBit": "github:1010technologies/pxt-makerbit#v2.2.0"
     },
     "files": [
