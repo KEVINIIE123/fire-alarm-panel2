@@ -1,6 +1,25 @@
 radio.onReceivedNumber(function (receivedNumber) {
-    if (receivedNumber == 1) {
-        ACtimer = 10
+    if (receivedNumber == 0) {
+        if (alarm == 1 && (silence == 0 && ack == 0)) {
+            ack = 1
+        } else if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 0)))) {
+            troublesilence = 1
+        }
+    } else if (receivedNumber == 1) {
+        if (input.pinIsPressed(TouchPin.P0) || (input.pinIsPressed(TouchPin.P1) || input.pinIsPressed(TouchPin.P2))) {
+            resetmessage = 1
+            Display("Can't reset", "Zone(s) in alarm", "Metsamarja 31", "", 2, 2, 2, 0)
+            basic.pause(2000)
+            resetmessage = 0
+        } else {
+            makerbit.clearLcd2004()
+            control.reset()
+        }
+    } else if (receivedNumber == 2) {
+        alarm = 1
+        zone1 = 1
+        zone2 = 1
+        zone3 = 1
     }
 })
 // Button A
@@ -72,7 +91,7 @@ input.onButtonPressed(Button.AB, function () {
     if (input.pinIsPressed(TouchPin.P0) || (input.pinIsPressed(TouchPin.P1) || input.pinIsPressed(TouchPin.P2))) {
         resetmessage = 1
         LCDbacklight(1)
-        Display("Can't reset", "Zone(s) in alarm", "", "", 2, 2, 0, 0)
+        Display("Can't reset", "Zone(s) in alarm", "Metsamarja 31", "Garaaž", 2, 2, 2, 2)
         basic.pause(2000)
         resetmessage = 0
     } else {
@@ -85,6 +104,9 @@ input.onButtonPressed(Button.B, function () {
     if (alarm == 1 && (silence == 0 && ack == 1)) {
         silence = 1
         pins.digitalWritePin(DigitalPin.P15, 0)
+    } else if (alarm == 1 && (silence == 1 && ack == 1)) {
+        silence = 0
+        pins.digitalWritePin(DigitalPin.P15, 1)
     }
 })
 function LCDbacklight (disableenable: number) {
@@ -96,6 +118,7 @@ function LCDbacklight (disableenable: number) {
         makerbit.setLcdBacklight(LcdBacklight.On)
     }
 }
+let ACtimer = 0
 let noac = 0
 let zone3 = 0
 let zone2 = 0
@@ -106,13 +129,13 @@ let trouble = 0
 let ack = 0
 let silence = 0
 let alarm = 0
-let ACtimer = 0
 let display4 = ""
 let display3 = ""
 let display2 = ""
 let display1 = ""
 let backlight = 0
 led.enable(false)
+radio.setGroup(39)
 let boot = 1
 makerbit.connectLcd(39)
 backlight = 1
@@ -121,7 +144,6 @@ display2 = ""
 display3 = ""
 display4 = ""
 pins.setAudioPin(AnalogPin.P16)
-radio.setGroup(86)
 makerbit.showStringOnLcd2004("####################", makerbit.position2004(LcdPosition2004.Pos1), 20)
 makerbit.showStringOnLcd2004("####################", makerbit.position2004(LcdPosition2004.Pos21), 20)
 makerbit.showStringOnLcd2004("####################", makerbit.position2004(LcdPosition2004.Pos41), 20)
@@ -149,7 +171,7 @@ basic.forever(function () {
         if (pins.digitalReadPin(DigitalPin.P7) == 1) {
             if (input.pinIsPressed(TouchPin.P0) || (input.pinIsPressed(TouchPin.P1) || input.pinIsPressed(TouchPin.P2))) {
                 resetmessage = 1
-                Display("Can't reset", "Zone(s) in alarm", "", "", 2, 2, 0, 0)
+                Display("Can't reset", "Zone(s) in alarm", "Metsamarja 31", "", 2, 2, 2, 0)
                 basic.pause(2000)
                 resetmessage = 0
             } else {
@@ -170,32 +192,33 @@ basic.forever(function () {
 basic.forever(function () {
     if (alarm == 0 && (silence == 0 && (ack == 0 && trouble == 0))) {
         if (resetmessage == 0) {
-            Display("System normal", "", "", "", 2, 0, 0, 0)
+            Display("System normal", "", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
         }
     } else if (alarm == 1 && (silence == 0 && ack == 0)) {
         LCDbacklight(1)
+        pins.digitalWritePin(DigitalPin.P15, 1)
         if (resetmessage == 0) {
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
-                Display("FIRE ALARM", "1", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "1", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 1 && zone3 == 0)) {
                 pins.digitalWritePin(DigitalPin.P14, 1)
-                Display("FIRE ALARM", "2", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "2", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                Display("FIRE ALARM", "3", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 0)) {
                 pins.digitalWritePin(DigitalPin.P13, 1)
                 pins.digitalWritePin(DigitalPin.P14, 1)
-                Display("FIRE ALARM", "1,2", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "1,2", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 1)) {
-                Display("FIRE ALARM", "1,2,3", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "1,2,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             } else if (zone1 == 1 && (zone2 == 0 && zone3 == 1)) {
-                Display("FIRE ALARM", "1,3", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "1,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                Display("FIRE ALARM", "2,3", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "2,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             }
         }
@@ -205,26 +228,26 @@ basic.forever(function () {
         LCDbacklight(1)
         if (resetmessage == 0) {
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
-                Display("FIRE ALARM", "1", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "1", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 0)
             } else if (zone1 == 0 && (zone2 == 1 && zone3 == 0)) {
                 pins.digitalWritePin(DigitalPin.P14, 0)
-                Display("FIRE ALARM", "2", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "2", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                Display("FIRE ALARM", "3", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 0)) {
                 pins.digitalWritePin(DigitalPin.P13, 0)
                 pins.digitalWritePin(DigitalPin.P14, 0)
-                Display("FIRE ALARM", "1,2", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "1,2", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 1)) {
-                Display("FIRE ALARM", "1,2,3", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "1,2,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 0)
                 pins.digitalWritePin(DigitalPin.P14, 0)
             } else if (zone1 == 1 && (zone2 == 0 && zone3 == 1)) {
-                Display("FIRE ALARM", "1,3", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "1,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 0)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                Display("FIRE ALARM", "2,3", "", "", 2, 0, 0, 0)
+                Display("FIRE ALARM", "2,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P14, 0)
             }
         }
@@ -235,26 +258,26 @@ basic.forever(function () {
         LCDbacklight(1)
         if (resetmessage == 0) {
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
-                Display("ALARM ACK", "1", "", "", 2, 0, 0, 0)
+                Display("ALARM ACKNOWLEDGED", "1", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 1 && zone3 == 0)) {
                 pins.digitalWritePin(DigitalPin.P14, 1)
-                Display("ALARM ACK", "2", "", "", 2, 0, 0, 0)
+                Display("ALARM ACKNOWLEDGED", "2", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                Display("ALARM ACK", "3", "", "", 2, 0, 0, 0)
+                Display("ALARM ACKNOWLEDGED", "3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 0)) {
                 pins.digitalWritePin(DigitalPin.P13, 1)
                 pins.digitalWritePin(DigitalPin.P14, 1)
-                Display("ALARM ACK", "1,2", "", "", 2, 0, 0, 0)
+                Display("ALARM ACKNOWLEDGED", "1,2", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 1)) {
-                Display("ALARM ACK", "1,2,3", "", "", 2, 0, 0, 0)
+                Display("ALARM ACKNOWLEDGED", "1,2,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             } else if (zone1 == 1 && (zone2 == 0 && zone3 == 1)) {
-                Display("ALARM ACK", "1,3", "", "", 2, 0, 0, 0)
+                Display("ALARM ACKNOWLEDGED", "1,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                Display("ALARM ACK", "2,3", "", "", 2, 0, 0, 0)
+                Display("ALARM ACKNOWLEDGED", "2,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             }
         }
@@ -263,26 +286,26 @@ basic.forever(function () {
         LCDbacklight(1)
         if (resetmessage == 0) {
             if (zone1 == 1 && (zone2 == 0 && zone3 == 0)) {
-                Display("ALARM SILENCED", "1", "", "", 2, 0, 0, 0)
+                Display("ALARM SILENCED", "1", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 1 && zone3 == 0)) {
-                Display("ALARM SILENCED", "2", "", "", 2, 0, 0, 0)
+                Display("ALARM SILENCED", "2", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                Display("ALARM SILENCED", "3", "", "", 2, 0, 0, 0)
+                Display("ALARM SILENCED", "3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 0)) {
-                Display("ALARM SILENCED", "1,2", "", "", 2, 0, 0, 0)
+                Display("ALARM SILENCED", "1,2", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             } else if (zone1 == 1 && (zone2 == 1 && zone3 == 1)) {
-                Display("ALARM SILENCED", "1,2,3", "", "", 2, 0, 0, 0)
+                Display("ALARM SILENCED", "1,2,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P14, 1)
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 1 && (zone2 == 0 && zone3 == 1)) {
-                Display("ALARM SILENCED", "1,3", "", "", 2, 0, 0, 0)
+                Display("ALARM SILENCED", "1,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P13, 1)
             } else if (zone1 == 0 && (zone2 == 0 && zone3 == 1)) {
-                Display("ALARM SILENCED", "2,3", "", "", 2, 0, 0, 0)
+                Display("ALARM SILENCED", "2,3", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
                 pins.digitalWritePin(DigitalPin.P14, 1)
             }
         }
@@ -290,9 +313,9 @@ basic.forever(function () {
     if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 0)))) {
         LCDbacklight(1)
         if (noac == 1) {
-            Display("System in fault", "NO AC POWER", "", "", 2, 2, 0, 0)
+            Display("System in fault", "NO AC POWER", "Metsamarja 31", "Garaaž", 2, 2, 2, 2)
         } else {
-            Display("System in fault", "", "", "", 2, 0, 0, 0)
+            Display("System in fault", "", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
         }
         pins.digitalWritePin(DigitalPin.P10, 1)
         pins.digitalWritePin(DigitalPin.P16, 1)
@@ -305,12 +328,17 @@ basic.forever(function () {
         pins.digitalWritePin(DigitalPin.P16, 0)
         pins.digitalWritePin(DigitalPin.P10, 1)
         if (noac == 1) {
-            Display("Fault silenced", "NO AC POWER", "", "", 2, 2, 0, 0)
+            Display("Fault silenced", "NO AC POWER", "Metsamarja 31", "Garaaž", 2, 2, 2, 2)
         } else {
-            Display("Fault silenced", "", "", "", 2, 0, 0, 0)
+            Display("Fault silenced", "", "Metsamarja 31", "Garaaž", 2, 0, 2, 2)
         }
     } else if (trouble == 1 && alarm == 1) {
         pins.digitalWritePin(DigitalPin.P10, 1)
+    }
+})
+basic.forever(function () {
+    if (1 == 1) {
+        ACtimer = 10
     }
 })
 basic.forever(function () {
@@ -350,49 +378,5 @@ basic.forever(function () {
                 silence = 0
             }
         }
-    }
-})
-basic.forever(function () {
-    if (serial.readLine() == "reset") {
-        if (input.pinIsPressed(TouchPin.P0) || (input.pinIsPressed(TouchPin.P1) || input.pinIsPressed(TouchPin.P2))) {
-            serial.writeLine("503 Service Unavailable")
-            resetmessage = 1
-            LCDbacklight(1)
-            Display("Can't reset", "Zone(s) in alarm", "", "", 2, 2, 0, 0)
-            basic.pause(2000)
-            resetmessage = 0
-        } else {
-            serial.writeLine("200 OK")
-            makerbit.clearLcd2004()
-            control.reset()
-        }
-    } else if (serial.readLine() == "forcereset") {
-        serial.writeLine("200 OK")
-        makerbit.clearLcd2004()
-        control.reset()
-    } else if (serial.readLine() == "alarm") {
-        alarm = 1
-        zone1 = 1
-        zone2 = 1
-        zone3 = 1
-        ack = 0
-        silence = 0
-        serial.writeLine("200 OK")
-    } else if (serial.readLine() == "ack") {
-        if (alarm == 1 && (silence == 0 && ack == 0)) {
-            ack = 1
-            serial.writeLine("200 OK")
-        } else if (alarm == 0 && (silence == 0 && (ack == 0 && (trouble == 1 && troublesilence == 0)))) {
-            troublesilence = 1
-            serial.writeLine("200 OK")
-        }
-    } else if (serial.readLine() == "silence") {
-        if (alarm == 1 && (silence == 0 && ack == 1)) {
-            silence = 1
-            pins.digitalWritePin(DigitalPin.P15, 0)
-            serial.writeLine("200 OK")
-        }
-    } else {
-    	
     }
 })
